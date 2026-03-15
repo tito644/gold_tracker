@@ -1,0 +1,49 @@
+# .github/workflows/gold_tracker.yml
+#
+# ده الـ Cron Job اللي هيشغّل السكريبت تلقائياً كل ساعة
+# محتاج تحط الفايل ده في المسار ده بالظبط جوا الـ repo
+ 
+name: Gold Price Tracker
+ 
+on:
+  # ── شغّل تلقائياً كل ساعة ──────────────────────────
+  schedule:
+    - cron: "0 * * * *"   # كل ساعة على الدقيقة صفر
+                           # لو عايز كل 6 ساعات: "0 */6 * * *"
+                           # لو عايز مرة في اليوم 8 صباحاً: "0 8 * * *"
+ 
+  # ── أو شغّله يدوياً من GitHub بضغطة زرار ──────────
+  workflow_dispatch:
+ 
+jobs:
+  fetch-gold-price:
+    runs-on: ubuntu-latest   # GitHub بيديك Linux مجاناً
+ 
+    steps:
+ 
+      # 1. نزّل الكود من الـ repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+ 
+      # 2. إعداد Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+ 
+      # 3. تنصيب المكتبات
+      - name: Install dependencies
+        run: pip install requests
+ 
+      # 4. شغّل السكريبت الأساسي
+      - name: Run gold tracker
+        run: python gold_tracker.py
+ 
+      # 5. احفظ الـ DB كـ Artifact عشان تقدر تنزّله
+      - name: Upload database
+        uses: actions/upload-artifact@v4
+        with:
+          name: gold-prices-db
+          path: gold_prices.db
+          retention-days: 30   # GitHub يحتفظ بيه 30 يوم
+ 
